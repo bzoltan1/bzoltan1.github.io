@@ -64,7 +64,7 @@ backend nas-server
 After some debugging I came to realize that I need to convince the apparmor to  let the haproxy access the PEM file, so the <code>/etc/apparmor.d/local/usr.sbin.haproxy</code> need to contain this</p><pre><code>/etc/ssl/nas.nokedli.org/* r,
 </code></pre><h3 id=nextcloud>NextCloud</h3><p>Installing NextCloud is not a short process, but still fairly simple and straight forward as the openSUSE documentation is complete. I just followed the instructions step by step.</p><p><a href=https://en.opensuse.org/SDB:LAMP_setup>https://en.opensuse.org/SDB:LAMP_setup</a></p><p><a href=https://en.opensuse.org/SDB:Nextcloud>https://en.opensuse.org/SDB:Nextcloud</a></p><p>There is one thing what is not mentioned in the documentation. In my case after the after <code>zypper install nextcloud</code> the server must be rebooted.</p><p>Also since I am using secure http the <code>/srv/www/htdocs/nextcloud/config/config.php</code> add <code>'overwriteprotocol' =&gt; 'https',</code></p><p>And the  array of the trusted domains should be fixed too</p><pre><code>'trusted_domains' =&gt;  
     array (  
-        0 =&gt; '[nas.nokedli.org](http://nas.nokedli.org)',  
+        0 =&gt; 'nas.nokedli.org',  
         1 =&gt; 'nas.nokedli.local',  
     ),  
 </code></pre><h3 id=monit>Monit</h3><p>The fundamentum of the idea is Monit. </p><p><a href=https://mmonit.com/wiki/Monit/Installation>https://mmonit.com/wiki/Monit/Installation</a></p><p><code>/etc/monit.d/mdadm_monitor</code></p><pre><code># Using simple regular expression matching
