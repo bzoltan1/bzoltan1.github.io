@@ -21,8 +21,7 @@ systemctl enable grafana-server
   # Determines whether user authentication is enabled over HTTP/HTTPS.
   auth-enabled = true
 ...
-Save and close the file. Next, restart the influxdb service to load the new security setting.
-</code></pre><pre><code>sudo systemctl restart influxdb
+</code></pre><p>Save and close the file. Next, restart the influxdb service to load the new security setting.</p><pre><code>sudo systemctl restart influxdb
 </code></pre><p>After that I could log in to the InfluxDB server with the admin username and password that you created above by executing the following command.</p><pre><code>$ influx -username 'admin' -password '***'
 </code></pre><p>I am not sure if was necessary but I have created the telegraf database.</p><pre><code>influx -username 'admin' -password '***'
   CREATE DATABASE &quot;telegraf&quot; WITH DURATION 17280h
