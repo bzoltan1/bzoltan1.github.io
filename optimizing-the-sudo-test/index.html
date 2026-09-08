@@ -1,0 +1,97 @@
+<!doctype html><html lang=en itemscope itemtype=http://schema.org/WebPage><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><title>Optimizing the sudo test - Zoltán's Blog</title><meta name=description content="From 9 minutes to 3 seconds with broader coverage"><meta name=author content="map[email:zoltan.balogh@suse.com github:bzoltan1 linkedin:zbalogh name:Zoltán Balogh]"><script type=application/ld+json>{"@context":"http://schema.org","@type":"WebSite","name":"Zoltán\u0027s Blog","url":"https:\/\/bzoltan1.github.io\/"}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Organization","name":"","url":"https:\/\/bzoltan1.github.io\/"}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https:\/\/bzoltan1.github.io\/","name":"home"}},{"@type":"ListItem","position":3,"item":{"@id":"https:\/\/bzoltan1.github.io\/optimizing-the-sudo-test\/","name":"Optimizing the sudo test"}}]}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Article","author":{"name":"Zoltán Balogh"},"headline":"Optimizing the sudo test","description":"The openQA test suite for openSUSE and SLE has a test module called tests\/console\/sudo.pm. It verifies that sudo works: passwords, shells, sudoers rules, environment isolation. Basic stuff. It runs tens of thousands of times per year and takes about 9 minutes each time. That adds up.\nWhere the time goes There is no single bottleneck. The test uses expect to interact with password prompts. Every sudo call goes through credential cache reset, process spawn, password entry, and result verification. It does this 20 times because the test runs the full suite twice with slightly different sudoers configurations.\n","inLanguage":"en","wordCount":835,"datePublished":"2026-09-08T08:00:00\u002b02:00","dateModified":"2026-09-08T08:00:00\u002b02:00","image":"https:\/\/bzoltan1.github.io\/avatar.png","keywords":["openSUSE, SLES, SUSE, Quality engineering, openQA, sudo"],"mainEntityOfPage":"https:\/\/bzoltan1.github.io\/optimizing-the-sudo-test\/","publisher":{"@type":"Organization","name":"https:\/\/bzoltan1.github.io\/","logo":{"@type":"ImageObject","url":"https:\/\/bzoltan1.github.io\/avatar.png","height":60,"width":60}}}</script><meta property="og:title" content="Optimizing the sudo test"><meta property="og:description" content="From 9 minutes to 3 seconds with broader coverage"><meta property="og:image" content="https://bzoltan1.github.io/avatar.png"><meta property="og:url" content="https://bzoltan1.github.io/optimizing-the-sudo-test/"><meta property="og:type" content="website"><meta property="og:site_name" content="Zoltán's Blog"><meta name=twitter:title content="Optimizing the sudo test"><meta name=twitter:description content="From 9 minutes to 3 seconds with broader coverage"><meta name=twitter:image content="https://bzoltan1.github.io/avatar.png"><meta name=twitter:card content="summary_large_image"><link href=https://bzoltan1.github.io/avatar.png rel=icon type=image/x-icon><meta name=generator content="Hugo 0.147.5"><link rel=alternate href=https://bzoltan1.github.io/index.xml type=application/rss+xml title="Zoltán's Blog"><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y crossorigin=anonymous><link rel=stylesheet href=https://use.fontawesome.com/releases/v5.5.0/css/all.css integrity=sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU crossorigin=anonymous><link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css integrity=sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u crossorigin=anonymous><link rel=stylesheet href=https://bzoltan1.github.io/css/main.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic"><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800"><link rel=stylesheet href=https://bzoltan1.github.io/css/syntax.css><link rel=stylesheet href=https://bzoltan1.github.io/css/codeblock.css><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css integrity=sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh crossorigin=anonymous><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css integrity=sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R crossorigin=anonymous></head><body><nav class="navbar navbar-default navbar-fixed-top navbar-custom"><div class=container-fluid><div class=navbar-header><button type=button class=navbar-toggle data-toggle=collapse data-target=#main-navbar>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=https://bzoltan1.github.io/>Zoltán's Blog</a></div><div class="collapse navbar-collapse" id=main-navbar><ul class="nav navbar-nav navbar-right"><li><a title=Blog href=https://bzoltan1.github.io/>Blog</a></li><li><a title=Tags href=https://bzoltan1.github.io/tags>Tags</a></li><li><a title=Home href=https://bzoltan1.github.io/>Home</a></li><li><a title=About href=https://bzoltan1.github.io/about>About</a></li></ul></div><div class=avatar-container><div class=avatar-img-border><a title="Zoltán's Blog" href=https://bzoltan1.github.io/><img class=avatar-img src=https://bzoltan1.github.io/avatar.png alt="Zoltán's Blog"></a></div></div></div></nav><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><header class=header-section><div class="intro-header no-img"><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><div class=post-heading><h1>Optimizing the sudo test</h1><h2 class=post-subheading>From 9 minutes to 3 seconds with broader coverage</h2><span class=post-meta><i class="fas fa-calendar"></i>&nbsp;Posted on September 8, 2026
+&nbsp;|&nbsp;<i class="fas fa-user"></i>&nbsp;Zoltán Balogh</span></div></div></div></div></div></header><div class=container role=main><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><article role=main class=blog-post><p>The openQA test suite for openSUSE and SLE has a test module called
+<a href=https://github.com/os-autoinst/os-autoinst-distri-opensuse/blob/master/tests/console/sudo.pm><code>tests/console/sudo.pm</code></a>.
+It verifies that sudo works: passwords, shells, sudoers rules,
+environment isolation. Basic stuff. It runs tens of thousands of
+times per year and takes about 9 minutes each time. That adds up.</p><h3 id=where-the-time-goes>Where the time goes</h3><p>There is no single bottleneck. The test uses <code>expect</code> to interact
+with password prompts. Every sudo call goes through credential cache
+reset, process spawn, password entry, and result verification. It
+does this 20 times because the test runs the full suite twice with
+slightly different sudoers configurations.</p><p>The second iteration tests sudoers rules with and without a <code>(root)</code>
+target user restriction. But the test body never runs
+<code>sudo -u &lt;nonroot></code>, so both iterations exercise identical behavior.
+Half the runtime is redundant.</p><p>The test used to be even slower. It used <code>sudo zypper -n in -f yast2</code>
+as the heavy command that needs a password. Each forced yast2
+reinstall took over a minute and ran 4 times per test. That was
+replaced with <code>sudo visudo --check --strict</code> in 2025, which helped
+a lot, but the structural overhead remained.</p><h3 id=looking-at-what-others-do>Looking at what others do</h3><p>Debian, Fedora, and Arch Linux all run <code>make check</code> during the sudo
+package build. The <a href=https://build.opensuse.org/package/view_file/Base:System/sudo/sudo.spec>openSUSE sudo spec</a>
+never had a <code>%check</code> section.</p><p>Debian also has autopkgtests for sudo: shell scripts that create
+real users, set real passwords, and test real sudo behavior against
+the installed package. Four tests, about 340 lines of shell. They
+run in seconds.</p><p>The openSUSE spec also had a <code>make -B</code> flag (unconditional rebuild)
+that was added in 2018 to work around a parallel build race
+condition (upstream sudo Bug #842). The upstream fix for that bug
+landed in sudo 1.8.24, also in 2018, and a note on the original SR
+said the workaround could be reverted after the next version update.
+The revert did not happen, so it accumulated for 8 years.</p><h3 id=three-changes>Three changes</h3><p><strong>Enabling upstream tests during build.</strong> A <a href=https://build.opensuse.org/request/show/1376260>change to the sudo
+package</a> drops the
+<code>-B</code> workaround, adds <code>--with-devel</code> to the configure flags to build
+the full upstream test suite including the <code>testsudoers</code> regression
+binary, and adds a <code>%check</code> section. The <code>--with-devel</code> flag had a
+parallel build issue because pre-generated parser files in the
+tarball race against yacc regeneration. Removing those files before
+the build forces proper dependency ordering. bison and flex were
+added as BuildRequires. 1,594 upstream tests now run during every
+build.</p><p><strong>Porting functional tests to Python.</strong> Debian&rsquo;s autopkgtests were
+ported to Python/pytest and combined with the test coverage from
+the existing <code>sudo.pm</code>. The <a href=https://github.com/os-autoinst/os-autoinst-distri-opensuse/pull/26609>agnostic test</a>
+covers authentication (correct password, wrong password, non-member
+rejection, credential caching), I/O redirection boundaries, shell
+modes (sudo -i vs sudo -s), environment variable isolation,
+NOPASSWD/PASSWD mixed rules, group-based sudoers access, DNS
+resilience, and sudoers.d file parsing.</p><p>A shipped-config validator was also added &ndash; something neither the
+openQA test nor Debian had. It reads the real <code>/usr/etc/sudoers</code>
+without replacing it and checks that the syntax is valid, permissions
+are correct, env_reset is enabled, secure_path is set, includedir
+directives exist, and the targetpw/ALL-ALL rule pair is consistent.</p><p><strong>Packaging as openqa-agnostic.</strong> The test follows the openqa-agnostic
+pattern so it runs both inside openQA via the agnosticTestRunner and
+standalone on any SUSE system with pytest installed.</p><h3 id=why-look-at-bugzilla>Why look at bugzilla</h3><p>When developing tests, it is natural to ask how troublesome the
+subject is. Without falling into survivorship bias, we want to know
+if our tests would have caught any issues that were reported in the
+past. One purpose of quality engineering is to take load off the
+engineers who deal with customer feedback, bug reports, and
+regressions. Good tests save money because they catch problems
+before customers do, and they prevent already-fixed bugs from coming
+back.</p><p>A review of sudo bugs in the SUSE bugzilla helped calibrate what the
+tests should focus on. The largest single category of real-world
+complaints was targetpw misconfiguration: users locked out because
+sudo asks for the wrong password after an update. These are not
+sudo code bugs but shipped-configuration problems. A functional
+test that replaces the config to test in isolation cannot detect
+them. That is why the shipped-config validator was added as a
+separate test class &ndash; it reads the real sudoers file and checks
+that the declared policy is internally consistent.</p><p>CVE test cases are added after the vulnerability is discovered, not
+before. The upstream <code>%check</code> suite prevents regressions of those
+fixes rather than catching zero-days. That is still valuable: it
+ensures that a patch is not accidentally dropped during a version
+bump or a rebase.</p><p>More than a few configuration bugs and at least one NOPASSWD
+regression would have been caught by these tests. The real value is
+cumulative: once any bug is fixed, the build-time and runtime tests
+help keep it fixed.</p><h3 id=what-is-next>What is next</h3><p>Once the packaging change lands, every sudo build in Factory will
+run the upstream unit tests. Once the openQA agnostic test PR is
+merged, the existing <code>sudo.pm</code> can be replaced with an optimized
+test that has broader coverage.</p><div class=blog-tags><a href=https://bzoltan1.github.io/tags/opensuse/>openSUSE</a>&nbsp;
+<a href=https://bzoltan1.github.io/tags/sles/>SLES</a>&nbsp;
+<a href=https://bzoltan1.github.io/tags/suse/>SUSE</a>&nbsp;
+<a href=https://bzoltan1.github.io/tags/quality-engineering/>Quality engineering</a>&nbsp;
+<a href=https://bzoltan1.github.io/tags/openqa/>openQA</a>&nbsp;
+<a href=https://bzoltan1.github.io/tags/sudo/>sudo</a>&nbsp;</div></article><ul class="pager blog-pager"><li class=previous><a href=https://bzoltan1.github.io/reverse-dependencies-as-a-zypper-plugin/ data-toggle=tooltip data-placement=top title="Reverse dependencies as a zypper plugin">&larr; Previous Post</a></li></ul></div></div></div><footer><div class=container><div class=row><div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1"><ul class="list-inline text-center footer-links"><li><a href=mailto:zoltan.balogh@suse.com title="Email me"><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i></span></a></li><li><a href=https://github.com/bzoltan1 title=GitHub><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i></span></a></li><li><a href=https://linkedin.com/in/zbalogh title=LinkedIn><span class="fa-stack fa-lg"><i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-linkedin fa-stack-1x fa-inverse"></i></span></a></li></ul><p class="credits copyright text-muted">Zoltán Balogh
+&nbsp;&bull;&nbsp;&copy;
+2026
+&nbsp;&bull;&nbsp;
+<a href=https://bzoltan1.github.io/>Zoltán's Blog</a></p><p class="credits theme-by text-muted"><a href=https://gohugo.io>Hugo v0.147.5</a> powered &nbsp;&bull;&nbsp; Theme <a href=https://github.com/halogenica/beautifulhugo>Beautiful Hugo</a> adapted from <a href=https://deanattali.com/beautiful-jekyll/>Beautiful Jekyll</a></p></div></div></div></footer><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js integrity=sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous onload=renderMathInElement(document.body)></script><script src=https://code.jquery.com/jquery-3.7.0.slim.min.js integrity=sha384-w5y/xIeYixWvfM+A1cEbmHPURnvyqmVg5eVENruEdDjcyRLUSNej7512JQGspFUr crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js integrity=sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd crossorigin=anonymous></script><script src=https://bzoltan1.github.io/js/main.js></script><script src=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js integrity=sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy crossorigin=anonymous></script><script src=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js integrity=sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q crossorigin=anonymous></script><script src=https://bzoltan1.github.io/js/load-photoswipe.js></script></body></html>
